@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Nano Banana</title>
+<script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f7f8fa;
+  --white:#ffffff;
+  --text:#111827;
+  --dim:#6b7280;
+  --dim2:#d1d5db;
+  --border:#e5e7eb;
+  --accent:#0066ff;
+  --accent2:#00c2ff;
+  --grad:linear-gradient(135deg,#0066ff,#00c2ff);
+  --green:#10b981;
+  --yellow:#f59e0b;
+  --red:#ef4444;
+  --r:16px;--rs:12px;--rxs:8px;
+}
+html,body{background:var(--bg);color:var(--text);font-family:'Manrope',sans-serif;min-height:100vh;overscroll-behavior:none;-webkit-tap-highlight-color:transparent;font-size:14px}
+
+/* ── HEADER ── */
+.hdr{
+  background:var(--white);padding:12px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:50;
+}
+.hdr-left{display:flex;align-items:center;gap:8px}
+.hdr-logo{
+  display:flex;align-items:center;gap:6px;
+  font-size:15px;font-weight:800;color:var(--text);
+}
+.hdr-logo-icon{
+  width:30px;height:30px;border-radius:9px;
+  background:var(--grad);
+  display:flex;align-items:center;justify-content:center;font-size:16px;
+}
+.hdr-bal{
+  display:flex;align-items:center;gap:4px;
+  background:var(--bg);border-radius:999px;
+  padding:5px 11px;font-size:12px;font-weight:700;
+  color:var(--text);cursor:pointer;border:1px solid var(--border);
+}
+.hdr-bal-num{color:var(--accent)}
+.hdr-bal-cost{font-size:10px;color:var(--dim);font-weight:500}
+
+/* ── BOTTOM NAV ── */
+.bnav{
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--white);border-top:1px solid var(--border);
+  display:flex;padding:6px 0 max(6px,env(safe-area-inset-bottom));
+  z-index:50;
+}
+.bnav-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
+  background:none;border:none;cursor:pointer;padding:4px 2px;
+  color:var(--dim2);font-size:10px;font-weight:600;transition:color .15s;
+}
+.bnav-item.active{color:var(--accent)}
+.bnav-ico{font-size:20px;line-height:1}
+
+/* ── PAGES ── */
+.page{display:none;padding-bottom:70px}
+.page.active{display:block}
+
+/* ── HERO ── */
+.hero{
+  background:var(--grad);
+  padding:20px 16px 24px;color:#fff;
+  position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;top:-40px;right:-40px;
+  width:160px;height:160px;border-radius:50%;
+  background:rgba(255,255,255,.08);
+}
+.hero::after{
+  content:'';position:absolute;bottom:-20px;left:30%;
+  width:100px;height:100px;border-radius:50%;
+  background:rgba(255,255,255,.06);
+}
+.hero-tag{
+  display:inline-flex;align-items:center;gap:4px;
+  background:rgba(255,255,255,.2);border-radius:999px;
+  padding:4px 10px;font-size:11px;font-weight:700;
+  margin-bottom:10px;
+}
+.hero-title{font-size:22px;font-weight:800;line-height:1.2;margin-bottom:6px}
+.hero-sub{font-size:13px;opacity:.85;line-height:1.5;margin-bottom:16px}
+.hero-btns{display:flex;gap:8px;position:relative;z-index:1}
+.hero-btn{
+  padding:10px 18px;border-radius:999px;border:none;
+  font-family:'Manrope',sans-serif;font-size:13px;font-weight:700;
+  cursor:pointer;transition:transform .1s,opacity .2s;
+}
+.hero-btn:active{transform:scale(.97)}
+.hero-btn-primary{background:#fff;color:var(--accent)}
+.hero-btn-secondary{background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.3)}
+
+/* ── CAT ICONS (как у Neurosphere) ── */
+.cat-icons{
+  background:var(--white);border-bottom:1px solid var(--border);
+  padding:14px 16px;
+  display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;
+}
+.cat-icons::-webkit-scrollbar{display:none}
+.cat-icon-item{
+  flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:5px;
+  cursor:pointer;
+}
+.cat-icon-circle{
+  width:52px;height:52px;border-radius:14px;
+  background:#eff6ff;border:1.5px solid transparent;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;transition:all .15s;
+}
+.cat-icon-item.active .cat-icon-circle{
+  background:#eff6ff;border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(0,102,255,.1);
+}
+.cat-icon-label{font-size:10px;font-weight:600;color:var(--dim);white-space:nowrap}
+.cat-icon-item.active .cat-icon-label{color:var(--accent)}
+
+/* ── CATALOG SECTIONS ── */
+.cat-section{padding:18px 16px 0}
+.cat-section-head{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  margin-bottom:4px;
+}
+.cat-section-title{font-size:16px;font-weight:800}
+.cat-section-desc{font-size:12px;color:var(--dim);margin-bottom:12px;line-height:1.4}
+.cat-section-more{
+  font-size:12px;color:var(--accent);font-weight:700;
+  background:none;border:none;cursor:pointer;white-space:nowrap;padding-top:2px;
+}
+
+/* ── CARDS ── */
+.cards-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;
+}
+.card{
+  background:var(--white);border-radius:var(--r);overflow:hidden;
+  cursor:pointer;border:1px solid var(--border);
+  transition:transform .15s,box-shadow .15s;
+  position:relative;
+}
+.card:active{transform:scale(.97);box-shadow:none}
+.card:hover{box-shadow:0 4px 16px rgba(0,0,0,.08)}
+.card-img-wrap{position:relative}
+.card-img{
+  width:100%;aspect-ratio:3/4;object-fit:cover;display:block;
+  background:var(--bg);
+}
+/* Промпт-бейдж как у Neurosphere */
+.card-prompt-badge{
+  position:absolute;bottom:8px;left:6px;right:6px;
+  background:rgba(0,0,0,.6);backdrop-filter:blur(6px);
+  border-radius:6px;padding:4px 8px;
+  font-size:10px;color:#fff;line-height:1.3;
+  overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+}
+/* Цена на карточке — наше отличие от Neurosphere */
+.card-price{
+  position:absolute;top:8px;right:8px;
+  background:rgba(0,0,0,.55);backdrop-filter:blur(4px);
+  border-radius:6px;padding:2px 7px;
+  font-size:10px;font-weight:700;color:#fff;
+}
+.card-emoji{
+  position:absolute;top:8px;left:8px;
+  width:26px;height:26px;border-radius:7px;
+  background:rgba(0,0,0,.5);backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center;font-size:14px;
+}
+.card-body{padding:10px 10px 12px}
+.card-title{font-size:13px;font-weight:700;margin-bottom:2px;line-height:1.3}
+.card-short{font-size:11px;color:var(--dim)}
+
+/* ── SEARCH ── */
+.search-wrap{padding:12px 16px;background:var(--white);border-bottom:1px solid var(--border)}
+.search-input{
+  width:100%;background:var(--bg);border:1px solid var(--border);
+  border-radius:var(--rs);padding:9px 12px 9px 36px;
+  font-family:'Manrope',sans-serif;font-size:13px;color:var(--text);outline:none;
+  transition:border-color .2s;position:relative;
+}
+.search-input:focus{border-color:var(--accent)}
+.search-input::placeholder{color:var(--dim2)}
+.search-wrap-inner{position:relative}
+.search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none}
+
+/* ── DETAIL PAGE ── */
+.detail-back{
+  display:flex;align-items:center;gap:6px;
+  padding:12px 16px;background:var(--white);
+  border-bottom:1px solid var(--border);
+  font-size:13px;font-weight:700;color:var(--accent);cursor:pointer;
+}
+.detail-hero{position:relative;background:var(--text)}
+.detail-hero-img{width:100%;max-height:280px;object-fit:cover;opacity:.85}
+.detail-hero-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(to top, rgba(0,0,0,.8) 0%, transparent 60%);
+  display:flex;flex-direction:column;justify-content:flex-end;padding:16px;color:#fff;
+}
+.detail-hero-title{font-size:20px;font-weight:800;margin-bottom:4px}
+.detail-hero-sub{font-size:12px;opacity:.8}
+.detail-body{padding:16px}
+.detail-section-label{
+  font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  color:var(--dim);margin-bottom:8px;
+}
+/* Галерея примеров — наше отличие */
+.examples-scroll{
+  display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;
+  padding-bottom:2px;margin-bottom:16px;
+}
+.examples-scroll::-webkit-scrollbar{display:none}
+.example-thumb{
+  flex-shrink:0;width:90px;height:120px;border-radius:var(--rxs);
+  overflow:hidden;border:1px solid var(--border);cursor:pointer;
+}
+.example-thumb img{width:100%;height:100%;object-fit:cover}
+.detail-prompt{
+  background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);
+  padding:12px;font-size:12px;color:var(--dim);line-height:1.5;
+  margin-bottom:16px;font-family:'Manrope',monospace;
+}
+.detail-start-btn{
+  width:100%;padding:15px;border:none;border-radius:var(--r);
+  background:var(--grad);color:#fff;
+  font-family:'Manrope',sans-serif;font-size:15px;font-weight:800;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
+  box-shadow:0 4px 16px rgba(0,102,255,.25);transition:transform .1s,opacity .2s;
+}
+.detail-start-btn:active{transform:scale(.98)}
+
+/* ── GENERATE ── */
+.gen-wrap{padding:16px}
+.gen-back{
+  display:flex;align-items:center;gap:6px;margin-bottom:14px;
+  font-size:13px;font-weight:700;color:var(--accent);cursor:pointer;
+}
+.block{
+  background:var(--white);border-radius:var(--r);padding:16px;
+  margin-bottom:10px;border:1px solid var(--border);
+}
+.block-label{
+  font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  color:var(--dim);margin-bottom:10px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+
+/* Mode tabs */
+.mode-tabs{
+  display:flex;background:var(--bg);border-radius:var(--rxs);
+  padding:3px;margin-bottom:14px;border:1px solid var(--border);
+}
+.mode-tab{
+  flex:1;padding:8px;border:none;border-radius:7px;background:transparent;
+  font-family:'Manrope',sans-serif;font-size:12px;font-weight:700;
+  color:var(--dim);cursor:pointer;transition:all .15s;
+}
+.mode-tab.active{
+  background:var(--white);color:var(--accent);
+  box-shadow:0 1px 4px rgba(0,0,0,.08);
+}
+
+/* Upload */
+.upload-zone{
+  border:2px dashed var(--dim2);border-radius:var(--rs);padding:20px;
+  text-align:center;cursor:pointer;position:relative;transition:border-color .2s,background .2s;
+}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--accent);background:#eff6ff}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-zone-icon{font-size:28px;margin-bottom:6px}
+.upload-zone-text{font-size:13px;color:var(--dim);font-weight:500}
+.upload-zone-hint{font-size:11px;color:var(--dim2);margin-top:3px}
+.upload-preview{position:relative;display:none}
+.upload-preview img{width:100%;max-height:160px;object-fit:cover;border-radius:var(--rs)}
+.upload-del{
+  position:absolute;top:8px;right:8px;width:26px;height:26px;
+  background:rgba(0,0,0,.6);border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:13px;color:#fff;border:none;cursor:pointer;
+}
+
+/* Prompt */
+.prompt-area{
+  width:100%;min-height:90px;background:var(--bg);border:1.5px solid var(--border);
+  border-radius:var(--rs);padding:11px 12px;
+  font-family:'Manrope',sans-serif;font-size:13px;color:var(--text);
+  resize:none;outline:none;transition:border-color .2s;line-height:1.5;
+}
+.prompt-area:focus{border-color:var(--accent)}
+.prompt-area::placeholder{color:var(--dim2)}
+/* AI-улучшение промпта — наша фича */
+.prompt-ai-btn{
+  display:flex;align-items:center;gap:5px;margin-top:6px;
+  padding:6px 12px;background:linear-gradient(135deg,#eff6ff,#e0f2fe);
+  border:1px solid #bfdbfe;border-radius:999px;
+  font-size:11px;font-weight:700;color:var(--accent);cursor:pointer;
+  transition:opacity .2s;
+}
+.prompt-ai-btn:hover{opacity:.8}
+.prompt-ai-btn.loading{opacity:.5;pointer-events:none}
+
+/* Chips */
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{
+  padding:5px 12px;border-radius:999px;border:1.5px solid var(--border);
+  background:transparent;font-size:12px;font-weight:600;color:var(--dim);
+  cursor:pointer;transition:all .15s;white-space:nowrap;
+  font-family:'Manrope',sans-serif;
+}
+.chip.active{
+  background:var(--accent);color:#fff;border-color:var(--accent);
+}
+
+/* Progress bar (как у Neurosphere) */
+.progress-wrap{
+  background:var(--white);border-radius:var(--r);padding:16px;
+  margin-bottom:10px;border:1px solid var(--border);display:none;
+}
+.progress-wrap.visible{display:block}
+.progress-head{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:10px;
+}
+.progress-status{
+  display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;
+}
+.progress-dot{
+  width:8px;height:8px;border-radius:50%;background:var(--accent);
+  animation:pdot 1s ease-in-out infinite;
+}
+@keyframes pdot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.progress-pct{font-size:13px;font-weight:700;color:var(--accent)}
+.progress-bar-track{
+  height:8px;background:var(--bg);border-radius:999px;overflow:hidden;
+  border:1px solid var(--border);
+}
+.progress-bar-fill{
+  height:100%;border-radius:999px;
+  background:var(--grad);
+  transition:width .4s ease;width:0%;
+}
+.progress-hint{font-size:11px;color:var(--dim);margin-top:8px}
+
+/* Gen button */
+.gen-btn-wrap{
+  position:fixed;bottom:70px;left:16px;right:16px;z-index:20;
+}
+.gen-btn{
+  width:100%;padding:15px;background:var(--grad);color:#fff;border:none;
+  border-radius:var(--r);font-family:'Manrope',sans-serif;font-size:15px;font-weight:800;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
+  box-shadow:0 4px 16px rgba(0,102,255,.3);transition:transform .1s,opacity .2s;
+}
+.gen-btn:active{transform:scale(.98)}
+.gen-btn:disabled{opacity:.4;cursor:default}
+.spinner{
+  width:18px;height:18px;border:2px solid rgba(255,255,255,.3);
+  border-top-color:#fff;border-radius:50%;
+  animation:spin .7s linear infinite;display:none;
+}
+.gen-btn.loading .spinner{display:block}
+.gen-btn.loading .btxt{display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── GALLERY (с промптами под фото) ── */
+.gal-wrap{padding:16px 16px 0}
+.gal-filter{
+  display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;scrollbar-width:none;
+}
+.gal-filter::-webkit-scrollbar{display:none}
+.gal-filter-btn{
+  flex-shrink:0;padding:5px 12px;border-radius:999px;
+  border:1.5px solid var(--border);background:transparent;
+  font-size:11px;font-weight:700;color:var(--dim);cursor:pointer;transition:all .15s;
+  font-family:'Manrope',sans-serif;
+}
+.gal-filter-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.gal-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.gal-item{
+  background:var(--white);border-radius:var(--r);overflow:hidden;
+  border:1px solid var(--border);cursor:pointer;
+}
+.gal-item-img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;background:var(--bg)}
+/* Промпт под фото — наше отличие */
+.gal-item-meta{padding:8px 10px 10px}
+.gal-item-style{font-size:11px;font-weight:700;color:var(--text);margin-bottom:3px}
+.gal-item-prompt{
+  font-size:10px;color:var(--dim);line-height:1.3;
+  overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+}
+.gal-item-actions{
+  display:flex;gap:4px;padding:0 8px 8px;
+}
+.gal-item-btn{
+  flex:1;padding:5px;border-radius:var(--rxs);border:1px solid var(--border);
+  background:transparent;font-size:10px;font-weight:700;color:var(--dim);
+  cursor:pointer;transition:all .15s;font-family:'Manrope',sans-serif;text-align:center;
+}
+.gal-item-btn:hover{color:var(--accent);border-color:var(--accent)}
+.gal-item-btn.regen:hover{color:var(--green);border-color:var(--green)}
+.gal-item.ph{
+  border:2px dashed var(--border);
+  display:flex;align-items:center;justify-content:center;
+  aspect-ratio:3/4;
+}
+.gal-item.ph::before{content:'🍌';font-size:32px;animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.4;transform:scale(.9)}50%{opacity:1;transform:scale(1.1)}}
+.gal-empty{
+  padding:50px 20px;text-align:center;
+}
+.gal-empty-icon{font-size:48px;margin-bottom:12px;opacity:.3}
+.gal-empty-title{font-size:16px;font-weight:800;color:var(--text);margin-bottom:6px}
+.gal-empty-sub{font-size:13px;color:var(--dim);margin-bottom:18px}
+.gal-empty-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:11px 20px;background:var(--grad);color:#fff;border:none;
+  border-radius:999px;font-family:'Manrope',sans-serif;font-size:13px;font-weight:700;
+  cursor:pointer;
+}
+
+/* ── BALANCE ── */
+.bal-hero{
+  background:var(--grad);padding:24px 16px;color:#fff;text-align:center;
+  position:relative;overflow:hidden;
+}
+.bal-hero::before{content:'';position:absolute;top:-50px;right:-50px;width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,.08)}
+.bal-num{font-size:52px;font-weight:800;line-height:1;margin-bottom:4px}
+.bal-sub{font-size:13px;opacity:.8}
+.bal-gen{
+  display:inline-flex;align-items:center;gap:4px;margin-top:10px;
+  background:rgba(255,255,255,.2);border-radius:999px;padding:5px 12px;
+  font-size:12px;font-weight:700;
+}
+.pkg-wrap{padding:16px}
+.pkg-title{font-size:16px;font-weight:800;margin-bottom:12px}
+.pkg-card{
+  background:var(--white);border-radius:var(--r);padding:16px;
+  margin-bottom:10px;border:1.5px solid var(--border);
+  display:flex;align-items:center;gap:12px;cursor:pointer;
+  transition:transform .1s,border-color .15s;
+}
+.pkg-card:active{transform:scale(.98)}
+.pkg-card:hover{border-color:var(--accent)}
+.pkg-card.popular{border-color:var(--accent);background:#eff6ff}
+.pkg-icon{font-size:28px;flex-shrink:0}
+.pkg-info{flex:1}
+.pkg-name{font-size:14px;font-weight:800;margin-bottom:2px}
+.pkg-desc{font-size:11px;color:var(--dim)}
+.pkg-badge{
+  font-size:9px;font-weight:700;padding:2px 6px;border-radius:999px;
+  background:var(--accent);color:#fff;margin-left:6px;vertical-align:middle;
+}
+.pkg-price{
+  font-size:17px;font-weight:800;color:var(--accent);flex-shrink:0;
+}
+.contact-btn{
+  width:100%;padding:14px;background:var(--grad);color:#fff;border:none;
+  border-radius:var(--r);font-family:'Manrope',sans-serif;font-size:14px;font-weight:800;
+  cursor:pointer;box-shadow:0 4px 12px rgba(0,102,255,.2);
+}
+
+/* ── LIGHTBOX ── */
+.lb{
+  position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:100;
+  display:none;flex-direction:column;align-items:center;justify-content:center;padding:16px;
+}
+.lb.open{display:flex}
+.lb img{max-width:100%;max-height:72vh;border-radius:var(--r)}
+.lb-btns{display:flex;gap:8px;margin-top:14px}
+.lb-btn{
+  padding:10px 20px;border-radius:999px;border:none;
+  font-family:'Manrope',sans-serif;font-size:13px;font-weight:700;cursor:pointer;
+}
+.lb-close{background:rgba(255,255,255,.15);color:#fff}
+.lb-save{background:var(--white);color:var(--accent)}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;top:76px;left:50%;
+  transform:translateX(-50%) translateY(-60px);
+  background:var(--text);color:#fff;border-radius:999px;padding:9px 18px;
+  font-size:13px;font-weight:700;
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1);
+  z-index:200;pointer-events:none;white-space:nowrap;
+  box-shadow:0 4px 14px rgba(0,0,0,.2);
+}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.ok{background:var(--green)}
+.toast.err{background:var(--red)}
+.toast.info{background:var(--accent)}
+
+/* Divider */
+.divider{height:1px;background:var(--border);margin:0 16px}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+<div class="lb" id="lb">
+  <img id="lbImg" src="" alt="">
+  <div class="lb-btns">
+    <button class="lb-btn lb-close" onclick="closeLb()">Закрыть</button>
+    <button class="lb-btn lb-save" onclick="saveLb()">⬇ Сохранить</button>
+  </div>
+</div>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-left">
+    <div class="hdr-logo">
+      <div class="hdr-logo-icon">🍌</div>
+      NANO BANANA
+    </div>
+  </div>
+  <div>
+    <div class="hdr-bal" onclick="goPage('balance')">
+      ◆ <span class="hdr-bal-num" id="hdrBal">—</span>
+      <span class="hdr-bal-cost">/ 12 кред.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ════ ГЛАВНАЯ ════ -->
+<div class="page active" id="page-home">
+  <div class="hero">
+    <div class="hero-tag">✨ ИИ генерация фото</div>
+    <div class="hero-title">Стань героем<br>любого кадра</div>
+    <div class="hero-sub">Загрузи своё селфи — получи себя в любом стиле. Модель сохранит твоё лицо.</div>
+    <div class="hero-btns">
+      <button class="hero-btn hero-btn-primary" onclick="goPage('catalog')">Выбрать стиль</button>
+      <button class="hero-btn hero-btn-secondary" onclick="startFree()">Свой промпт</button>
+    </div>
+  </div>
+
+  <!-- Иконки категорий как у Neurosphere -->
+  <div class="cat-icons" id="homeIcons"></div>
+
+  <!-- Поиск — наше отличие -->
+  <div class="search-wrap">
+    <div class="search-wrap-inner">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" id="searchInput" placeholder="Поиск стилей..." oninput="onSearch(this.value)">
+    </div>
+  </div>
+
+  <div id="homeContent" style="padding-bottom:8px"></div>
+</div>
+
+<!-- ════ КАТАЛОГ ════ -->
+<div class="page" id="page-catalog">
+  <div class="cat-icons" id="catIcons" style="position:sticky;top:57px;z-index:20"></div>
+  <div id="catContent" style="padding-bottom:8px"></div>
+</div>
+
+<!-- ════ DETAIL ════ -->
+<div class="page" id="page-detail">
+  <div class="detail-back" onclick="goBack()">← Назад</div>
+  <div class="detail-hero">
+    <img class="detail-hero-img" id="dImg" src="" alt="">
+    <div class="detail-hero-overlay">
+      <div class="detail-hero-title" id="dTitle"></div>
+      <div class="detail-hero-sub" id="dSub"></div>
+    </div>
+  </div>
+  <div class="detail-body">
+    <!-- Галерея примеров — наша фича -->
+    <div class="detail-section-label">Примеры результатов</div>
+    <div class="examples-scroll" id="dExamples">
+      <div style="font-size:12px;color:var(--dim);padding:10px 0">Загрузи своё фото и попробуй →</div>
+    </div>
+
+    <button class="detail-start-btn" onclick="startFromDetail()">
+      ✦ Создать · ◆ 12 кред.
+    </button>
+  </div>
+</div>
+
+<!-- ════ СОЗДАТЬ ════ -->
+<div class="page" id="page-generate">
+  <div class="gen-wrap">
+    <div class="gen-back" onclick="goPage('catalog')">← К стилям</div>
+
+    <!-- Режим -->
+    <div class="mode-tabs">
+      <button class="mode-tab active" id="modeTabStyle" onclick="setMode('style')">✨ Из стиля</button>
+      <button class="mode-tab" id="modeTabFree"  onclick="setMode('free')">✏️ Свой промпт</button>
+    </div>
+
+    <!-- Стиль режим -->
+    <div id="modeStyleWrap">
+      <div id="selCardWrap" style="display:none;background:var(--white);border-radius:var(--r);overflow:hidden;border:1px solid var(--border);margin-bottom:10px;display:none">
+        <div style="display:flex;gap:0">
+          <img id="selImg" style="width:80px;flex-shrink:0;object-fit:cover" src="" alt="">
+          <div style="padding:12px;flex:1">
+            <div id="selTitle" style="font-size:14px;font-weight:800;margin-bottom:3px"></div>
+            <div id="selShort" style="font-size:11px;color:var(--dim);margin-bottom:8px"></div>
+            <button onclick="goPage('catalog')" style="font-size:11px;color:var(--accent);font-weight:700;background:none;border:none;cursor:pointer;padding:0">Изменить стиль →</button>
+          </div>
+        </div>
+      </div>
+      <div id="noStyleHint" style="background:var(--white);border:1.5px dashed var(--dim2);border-radius:var(--r);padding:16px;text-align:center;color:var(--dim);font-size:13px;margin-bottom:10px">
+        Выбери стиль на вкладке <b>Стили</b> выше 👆
+      </div>
+    </div>
+
+    <!-- Свой промпт режим -->
+    <div id="modeFreeWrap" style="display:none">
+      <div class="block">
+        <div class="block-label">
+          Описание
+          <span style="font-size:10px;color:var(--dim);text-transform:none;letter-spacing:0;font-weight:500">Опиши что хочешь</span>
+        </div>
+        <textarea class="prompt-area" id="customPrompt"
+          placeholder="Например: realistic portrait in Tokyo, neon lights, rain, cinematic 4K
+
+Или: девушка в кимоно на фоне горы Фудзи, рассвет"></textarea>
+        <!-- AI улучшение промпта -->
+        <button class="prompt-ai-btn" id="aiImproveBtn" onclick="improvePrompt()">
+          ✨ Улучшить промпт с помощью ИИ
+        </button>
+      </div>
+    </div>
+
+    <!-- Фото -->
+    <div class="block">
+      <div class="block-label">📸 Твоё фото (референс)</div>
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp" onchange="handleUpload(this)">
+        <div class="upload-zone-icon">📸</div>
+        <div class="upload-zone-text">Нажми или перетащи фото</div>
+        <div class="upload-zone-hint">JPEG, PNG, WEBP · чёткое фото лица</div>
+      </div>
+      <div class="upload-preview" id="uploadPreview">
+        <img id="previewImg" src="" alt="">
+        <button class="upload-del" onclick="delPhoto()">✕</button>
+      </div>
+    </div>
+
+    <!-- Прогресс-бар (показывается во время генерации) -->
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-head">
+        <div class="progress-status">
+          <div class="progress-dot"></div>
+          В процессе
+        </div>
+        <div class="progress-pct" id="progressPct">0%</div>
+      </div>
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" id="progressBar"></div>
+      </div>
+      <div class="progress-hint" id="progressHint">Обычно занимает 30–90 секунд...</div>
+    </div>
+
+    <!-- Параметры -->
+    <div class="block">
+      <div class="block-label">Формат</div>
+      <div class="chips" id="aspectChips"></div>
+    </div>
+    <div class="block" style="margin-bottom:80px">
+      <div class="block-label">Качество</div>
+      <div class="chips" id="resChips"></div>
+    </div>
+  </div>
+
+  <div class="gen-btn-wrap">
+    <button class="gen-btn" id="genBtn" onclick="generate()">
+      <div class="spinner"></div>
+      <span class="btxt">✦ Сгенерировать · ◆ 12 кред.</span>
+    </button>
+  </div>
+</div>
+
+<!-- ════ МОИ ФОТО ════ -->
+<div class="page" id="page-gallery">
+  <div class="gal-wrap">
+    <div class="gal-filter" id="galFilter">
+      <button class="gal-filter-btn active" onclick="filterGal('all',this)">Все</button>
+      <button class="gal-filter-btn" onclick="filterGal('fav',this)">❤️ Избранные</button>
+    </div>
+    <div class="gal-empty" id="galEmpty">
+      <div class="gal-empty-icon">🖼</div>
+      <div class="gal-empty-title">Пока пусто</div>
+      <div class="gal-empty-sub">Твои генерации появятся здесь. Давай оживим эту страницу!</div>
+      <button class="gal-empty-btn" onclick="goPage('catalog')">✨ Создать изображение</button>
+    </div>
+    <div class="gal-grid" id="galGrid" style="display:none"></div>
+  </div>
+</div>
+
+<!-- ════ БАЛАНС ════ -->
+<div class="page" id="page-balance">
+  <div class="bal-hero">
+    <div class="bal-num" id="balNum">—</div>
+    <div class="bal-sub">кредитов на счету</div>
+    <div class="bal-gen" id="balGen">≈ — генераций</div>
+  </div>
+  <div class="pkg-wrap">
+    <div class="pkg-title">Пополнить баланс</div>
+    <div class="pkg-card" onclick="openContact('Старт — 99₽')">
+      <div class="pkg-icon">⚡</div>
+      <div class="pkg-info"><div class="pkg-name">Старт</div><div class="pkg-desc">120 кредитов · 10 генераций</div></div>
+      <div class="pkg-price">99₽</div>
+    </div>
+    <div class="pkg-card popular" onclick="openContact('Базовый — 299₽')">
+      <div class="pkg-icon">🎯</div>
+      <div class="pkg-info"><div class="pkg-name">Базовый<span class="pkg-badge">Популярный</span></div><div class="pkg-desc">420 кредитов · 35 генераций</div></div>
+      <div class="pkg-price">299₽</div>
+    </div>
+    <div class="pkg-card" onclick="openContact('Про — 599₽')">
+      <div class="pkg-icon">🚀</div>
+      <div class="pkg-info"><div class="pkg-name">Про</div><div class="pkg-desc">960 кредитов · 80 генераций</div></div>
+      <div class="pkg-price">599₽</div>
+    </div>
+    <div class="pkg-card" onclick="openContact('VIP — 990₽')">
+      <div class="pkg-icon">👑</div>
+      <div class="pkg-info"><div class="pkg-name">VIP</div><div class="pkg-desc">3000 кредитов · 250 генераций</div></div>
+      <div class="pkg-price">990₽</div>
+    </div>
+    <button class="contact-btn" style="margin-top:4px" onclick="openContact()">💬 Написать для оплаты</button>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bnav">
+  <button class="bnav-item active" id="nav-home"     onclick="goPage('home')">    <div class="bnav-ico">🏠</div>Главная</button>
+  <button class="bnav-item"        id="nav-catalog"  onclick="goPage('catalog')"> <div class="bnav-ico">✨</div>Стили</button>
+  <button class="bnav-item"        id="nav-generate" onclick="goPage('generate')"><div class="bnav-ico">🎨</div>Создать</button>
+  <button class="bnav-item"        id="nav-gallery"  onclick="goPage('gallery')"> <div class="bnav-ico">🖼</div>Мои фото</button>
+  <button class="bnav-item"        id="nav-balance"  onclick="goPage('balance')"> <div class="bnav-ico">💰</div>Баланс</button>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+const API = "https://web-production-4634f.up.railway.app";
+
+// Встроенный каталог — работает без сервера
+const CATALOG = {
+  categories:[
+    {id:"trends",   title:"🔥 Тренды",            desc:"Лови самые горячие AI-фото", order:1},
+    {id:"couples",  title:"💑 Пары и романтика",   desc:"Красивые кадры для двоих",   order:2},
+    {id:"status",   title:"👑 Статус и лайфстайл", desc:"Выгляди богато и стильно",   order:3},
+    {id:"family",   title:"👨‍👩‍👧 Семья",              desc:"Трогательные семейные кадры", order:4},
+    {id:"styles",   title:"🎭 Образы и стили",     desc:"Примерь любой образ",        order:5},
+    {id:"holidays", title:"🎉 Праздники",          desc:"Особые моменты навсегда",    order:6},
+    {id:"tools",    title:"🛠 Инструменты",        desc:"Умные AI инструменты",       order:7},
+  ],
+  cards:[
+    {id:"bbq_couple",    category:"trends",   order:1, title:"Отдых у мангала",     short:"Расслабленный стиль",   emoji:"🔥", img:"img/ref_01.jpg", prompt:"Use the face from the reference photo exactly, preserve all facial features. Young couple relaxing near BBQ grill, private luxury house backyard, casual black hoodie and grey sweatpants, sunglasses, holding Corona beer, summer vibes, photorealistic cinematic 4K", aspect:"9:16", resolution:"2K"},
+    {id:"close_eyes",    category:"couples",  order:1, title:"Близость",            short:"Крупный план лица",     emoji:"👁", img:"img/ref_02.jpg", prompt:"Use the face from the reference photo exactly, preserve all facial features. Extreme close-up portrait two faces side by side touching noses, pure black background, dramatic studio lighting, ultra detailed eyes, skin texture, photorealistic 4K intimate mood", aspect:"9:16", resolution:"2K"},
+    {id:"soldier",       category:"family",   order:1, title:"Память поколений",    short:"Эмоциональный портрет", emoji:"🎖", img:"img/ref_03.jpg", prompt:"Use the face from the reference photo exactly, preserve all facial features. Military uniform portrait, man holding small child who holds old black and white soldier photograph, dramatic moody lighting, dark warm tones, emotional photorealistic cinematic 4K", aspect:"9:16", resolution:"2K"},
+    {id:"birthday_kid",  category:"holidays", order:1, title:"День рождения",       short:"Студийный портрет",     emoji:"🎂", img:"img/ref_04.jpg", prompt:"Use the face from the reference photo exactly, preserve all facial features. Child blowing out birthday number candle on dark velvet cake, pure black background, dramatic side studio lighting, smoke trail from candle, cinematic close-up photorealistic 4K", aspect:"9:16", resolution:"2K"},
+    {id:"couple_bw",     category:"couples",  order:2, title:"Пара ч/б заставка",   short:"На телефон",            emoji:"🖤", img:"img/ref_05.jpg", prompt:"Use the face from the reference photo exactly, preserve all facial features. Couple portrait, black and white photography, pure white studio background, man and woman smiling close together, clean minimal aesthetic, film grain texture, photorealistic 4K wallpaper", aspect:"9:16", resolution:"2K"},
+    {id:"birthday_woman",category:"holidays", order:2, title:"С детства до сейчас", short:"Творческий портрет",    emoji:"🎉", img:"img/ref_06.jpg", prompt:"Use the face from the reference photo exactly, preserve all facial features. Young woman in elegant black blazer holding small birthday cake with number candles, childhood photo projected as glowing halo circle on grey studio background, black and silver balloons, cinematic side lighting photorealistic 4K", aspect:"9:16", resolution:"2K"},
+    {id:"dad_princess",  category:"family",   order:2, title:"Папа и принцесса",    short:"Семейный портрет",      emoji:"👸", img:"img/ref_07.jpg", prompt:"Use the face from the reference photo exactly, preserve all facial features. Young man in crisp white shirt placing sparkling diamond tiara crown on little girl in soft pink satin dress, white studio background, soft warm natural lighting, genuine smile, photorealistic editorial 4K", aspect:"9:16", resolution:"2K"},
+    {id:"luxury_dinner", category:"status",   order:1, title:"Деловой ужин",        short:"Luxury lifestyle",      emoji:"🍷", img:"img/ref_08.jpg", prompt:"Use the face from the reference photo exactly, preserve all facial features. Two sophisticated businessmen at luxury fine dining restaurant, white linen tablecloth, holding premium cigars, professional waiter lighting cigar, dark moody upscale interior, expensive watches, cinematic low key lighting photorealistic 4K", aspect:"9:16", resolution:"2K"},
+    {id:"fsb_man",       category:"trends",   order:2, title:"Задержание",          short:"Вирусный контент",      emoji:"💰", img:"img/ref_09.jpg", prompt:"Use the face from the reference photo exactly, preserve all facial features. Stylish young man smiling confidently standing next to matte black BMW XM, special forces officers in black FSB tactical uniforms behind, Louis Vuitton duffle bag stuffed with cash bundles on car hood, credit cards and iPhones spread out, cinematic photorealistic 4K", aspect:"9:16", resolution:"2K"},
+    {id:"fsb_woman",     category:"trends",   order:3, title:"Богатая и опасная",   short:"Вирусный контент",      emoji:"👮‍♀️",img:"img/ref_10.jpg", prompt:"Use the face from the reference photo exactly, preserve all facial features. Stunning confident woman in sleek black catsuit smiling, flanked by two FSB special forces officers in full tactical gear, stacks of Russian ruble bills on wooden table, multiple credit cards, MacBook Pro, cinematic photorealistic 4K", aspect:"9:16", resolution:"2K"},
+    {id:"sea_couple",    category:"couples",  order:3, title:"Романтика у моря",    short:"Чёрно-белое кино",      emoji:"🌊", img:"img/ref_11.jpg", prompt:"Use the face from the reference photo exactly, preserve all facial features. Romantic couple faces close together almost kissing, dramatic stormy sea beach background, seagulls flying, classic black and white film photography, wind blowing hair, shallow depth of field, cinematic 4K", aspect:"9:16", resolution:"2K"},
+    {id:"bmw_night",     category:"status",   order:2, title:"Ночной город",        short:"Luxury lifestyle",      emoji:"🚗", img:"img/ref_12.jpg", prompt:"Use the face from the reference photo exactly, preserve all facial features. Young man leaning confidently against polished black BMW at night, grand illuminated classical palace building background, premium Armani tracksuit, white sneakers, wet cobblestone street reflections, moody cinematic lighting photorealistic 4K", aspect:"9:16", resolution:"2K"},
+    {id:"speeder",       category:"trends",   order:4, title:"Камера на трассе",    short:"Вирусный контент",      emoji:"📸", img:"img/ref_13.jpg", prompt:"Use the face from the reference photo exactly, preserve all facial features. Speed camera aerial drone shot from above capturing black Toyota Land Cruiser on highway at 113 km/h, beautiful girl standing through open sunroof arms raised wind blowing hair tongue out, guy driving with sunglasses giving thumbs up, traffic camera overlay data, black and white cinematic 4K", aspect:"9:16", resolution:"2K"},
+    {id:"photobooth",    category:"couples",  order:4, title:"Фотобудка пары",      short:"Трендовый формат",      emoji:"💑", img:"img/ref_14.jpg", prompt:"Use the face from the reference photo exactly, preserve all facial features. Couple photobooth strip collage, four black and white square frames 2x2: solo portrait smiling, solo looking away, couple laughing together, couple kissing, white background, film grain, classic photobooth aesthetic, photorealistic 4K", aspect:"1:1",  resolution:"2K"},
+  ]
+};
+// ═══════════════════════════════════════════════════
+
+if (window.vkBridge) vkBridge.send("VKWebAppInit");
+
+const S = {
+  uid:null, balance:null,
+  catalog: CATALOG,
+  activeCat:"all",
+  selected:null,
+  mode:"style",
+  photo:null, photoUrl:null,
+  aspect:"9:16", res:"2K",
+  gallery: JSON.parse(localStorage.getItem("nb_v4_gal")||"[]"),
+  galFilter:"all",
+  generating:false,
+  prevPage:"home",
+  progress:0, progressTimer:null,
+};
+
+const ASPECTS=["9:16","1:1","4:5","3:4","16:9","4:3","2:3","21:9"];
+const RES=["1K","2K","4K"];
+
+// ── Init ──────────────────────────────────────────────
+async function init() {
+  renderIcons("homeIcons", true);
+  renderIcons("catIcons", false);
+  renderHomeContent("all");
+  renderCatContent("all");
+  renderChips();
+  renderGallery();
+  try {
+    const d = await vkBridge.send("VKWebAppGetUserInfo");
+    S.uid = d.id;
+  } catch { S.uid = "u"+Math.random().toString(36).slice(2,9); }
+  loadBalance();
+  loadServerCatalog();
+}
+
+// ── Balance ───────────────────────────────────────────
+async function loadBalance() {
+  try {
+    const r = await fetch(`${API}/balance?user_id=${S.uid}`,{signal:AbortSignal.timeout(8000)});
+    const d = await r.json();
+    S.balance = d.balance ?? 0;
+    updateBalDisplay();
+  } catch {}
+}
+
+function updateBalDisplay() {
+  const b = S.balance ?? 0;
+  document.getElementById("hdrBal").textContent = b;
+  document.getElementById("balNum").textContent  = b;
+  document.getElementById("balGen").textContent  = `≈ ${Math.floor(b/12)} генераций`;
+}
+
+// ── Server catalog ────────────────────────────────────
+async function loadServerCatalog() {
+  try {
+    const r = await fetch(`${API}/catalog`,{signal:AbortSignal.timeout(10000)});
+    if (!r.ok) return;
+    const d = await r.json();
+    if (d.cards?.length) {
+      S.catalog = d;
+      renderIcons("homeIcons", true);
+      renderIcons("catIcons", false);
+      renderHomeContent(S.activeCat);
+      renderCatContent(S.activeCat);
+    }
+  } catch {}
+}
+
+// ── Icons (как у Neurosphere — круглые иконки категорий) ──
+function renderIcons(elId, withAll) {
+  const el = document.getElementById(elId);
+  const cats = S.catalog.categories || [];
+  let html = "";
+  if (withAll) {
+    html += `<div class="cat-icon-item ${S.activeCat==='all'?'active':''}" onclick="setCat('all','${elId}')">
+      <div class="cat-icon-circle">⭐</div>
+      <div class="cat-icon-label">Все</div>
+    </div>`;
+  }
+  cats.forEach(c => {
+    const ico = c.title.split(" ")[0];
+    const name = c.title.replace(/^[^\s]+\s/,"");
+    html += `<div class="cat-icon-item ${S.activeCat===c.id?'active':''}" onclick="setCat('${c.id}','${elId}')">
+      <div class="cat-icon-circle">${ico}</div>
+      <div class="cat-icon-label">${name.slice(0,8)}</div>
+    </div>`;
+  });
+  el.innerHTML = html;
+}
+
+function setCat(id, sourceElId) {
+  S.activeCat = id;
+  ["homeIcons","catIcons"].forEach(eid => {
+    document.querySelectorAll(`#${eid} .cat-icon-item`).forEach(el => {
+      el.classList.toggle("active", el.onclick?.toString().includes(`'${id}'`));
+    });
+  });
+  renderHomeContent(id);
+  renderCatContent(id);
+  document.getElementById("searchInput").value = "";
+}
+
+// ── Cards ─────────────────────────────────────────────
+function getCards(catId) {
+  const cards = S.catalog.cards || [];
+  return catId === "all" ? cards : cards.filter(c=>c.category===catId);
+}
+
+function cardHTML(card) {
+  const d = JSON.stringify(card).replace(/"/g,"&quot;");
+  // Промпт-бейдж — первые 6 слов промпта без технической части
+  const words = card.prompt.replace(/Use the face.*?features\./,"").trim().split(" ").slice(0,5).join(" ");
+  return `<div class="card" onclick='openDetail(${d})'>
+    <div class="card-img-wrap">
+      <img class="card-img" src="${card.img}" alt="${card.title}" loading="lazy"
+           onerror="this.style.background='#f3f4f6';this.style.aspectRatio='3/4'">
+      <div class="card-emoji">${card.emoji}</div>
+      <div class="card-price">◆ 12</div>
+      <div class="card-prompt-badge">${words}...</div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">${card.title}</div>
+      <div class="card-short">${card.short}</div>
+    </div>
+  </div>`;
+}
+
+// ── Home content (секции по категориям как у Neurosphere) ──
+function renderHomeContent(catId) {
+  const el = document.getElementById("homeContent");
+  if (catId !== "all") {
+    const cards = getCards(catId);
+    el.innerHTML = `<div style="padding:14px 16px 0"><div class="cards-grid">${cards.map(cardHTML).join("")}</div></div>`;
+    return;
+  }
+  // В режиме "Все" — секции по 2 карточки
+  const cats = S.catalog.categories || [];
+  let html = "";
+  cats.forEach(cat => {
+    const cards = getCards(cat.id).slice(0,2);
+    if (!cards.length) return;
+    html += `<div class="cat-section">
+      <div class="cat-section-head">
+        <div>
+          <div class="cat-section-title">${cat.title}</div>
+        </div>
+        <button class="cat-section-more" onclick="setCat('${cat.id}','homeIcons')">Все →</button>
+      </div>
+      <div class="cat-section-desc">${cat.desc||""}</div>
+      <div class="cards-grid">${cards.map(cardHTML).join("")}</div>
+    </div><div style="height:1px;background:var(--border);margin:18px 16px 0"></div>`;
+  });
+  el.innerHTML = html || `<div style="padding:40px;text-align:center;color:var(--dim)">Загружаю...</div>`;
+}
+
+// ── Catalog content (полная сетка) ────────────────────
+function renderCatContent(catId) {
+  const el = document.getElementById("catContent");
+  if (catId !== "all") {
+    const cards = getCards(catId);
+    const cat = (S.catalog.categories||[]).find(c=>c.id===catId);
+    el.innerHTML = `
+      <div class="cat-section">
+        ${cat?`<div class="cat-section-title">${cat.title}</div><div class="cat-section-desc">${cat.desc||""}</div>`:""}
+        <div class="cards-grid">${cards.map(cardHTML).join("")}</div>
+      </div>`;
+    return;
+  }
+  let html="";
+  (S.catalog.categories||[]).forEach(cat=>{
+    const cards=getCards(cat.id); if(!cards.length)return;
+    html+=`<div class="cat-section">
+      <div class="cat-section-head">
+        <div><div class="cat-section-title">${cat.title}</div></div>
+      </div>
+      <div class="cat-section-desc">${cat.desc||""}</div>
+      <div class="cards-grid">${cards.map(cardHTML).join("")}</div>
+    </div><div style="height:1px;background:var(--border);margin:18px 16px 0"></div>`;
+  });
+  el.innerHTML = html;
+}
+
+// ── Search ────────────────────────────────────────────
+function onSearch(q) {
+  const el = document.getElementById("homeContent");
+  if (!q.trim()) { renderHomeContent(S.activeCat); return; }
+  const cards = (S.catalog.cards||[]).filter(c=>
+    c.title.toLowerCase().includes(q.toLowerCase()) ||
+    c.short.toLowerCase().includes(q.toLowerCase())
+  );
+  el.innerHTML = `<div style="padding:14px 16px 0">
+    <div style="font-size:12px;color:var(--dim);margin-bottom:10px">Найдено: ${cards.length}</div>
+    <div class="cards-grid">${cards.map(cardHTML).join("")}</div>
+  </div>`;
+}
+
+// ── Detail page ───────────────────────────────────────
+let detailCard = null;
+function openDetail(card) {
+  detailCard = card;
+  S.prevPage = S.activePage || "catalog";
+  document.getElementById("dImg").src   = card.img;
+  document.getElementById("dTitle").textContent = `${card.emoji} ${card.title}`;
+  document.getElementById("dSub").textContent   = card.short;
+  // промпт скрыт
+  // Примеры из галереи этого стиля
+  const myExamples = S.gallery.filter(g=>g.cardId===card.id && g.url && !g.ph);
+  const el = document.getElementById("dExamples");
+  if (myExamples.length) {
+    el.innerHTML = myExamples.map(e=>`
+      <div class="example-thumb" onclick="openLb('${e.url}')">
+        <img src="${e.url}" loading="lazy">
+      </div>`).join("") + `<div class="example-thumb" style="display:flex;align-items:center;justify-content:center;background:var(--bg);border:2px dashed var(--dim2);cursor:pointer;font-size:20px;color:var(--dim)" onclick="startFromDetail()">+</div>`;
+  } else {
+    el.innerHTML = `<div style="font-size:12px;color:var(--dim);padding:10px 0">Сгенерируй первым и примеры появятся здесь →</div>`;
+  }
+  goPage("detail");
+}
+
+function startFromDetail() {
+  if (detailCard) selectCard(detailCard);
+  else goPage("generate");
+}
+
+function goBack() { goPage(S.prevPage || "catalog"); }
+
+// ── Select card → generate ────────────────────────────
+function selectCard(card) {
+  S.selected = card;
+  S.aspect   = card.aspect    || "9:16";
+  S.res      = card.resolution || "2K";
+  // Обновить блок стиля
+  const sw = document.getElementById("selCardWrap");
+  sw.style.display = "flex";
+  document.getElementById("noStyleHint").style.display = "none";
+  document.getElementById("selImg").src   = card.img;
+  document.getElementById("selTitle").textContent = `${card.emoji} ${card.title}`;
+  document.getElementById("selShort").textContent = card.short;
+  setMode("style");
+  renderChips();
+  goPage("generate");
+  toast(`${card.emoji} ${card.title}`, "ok");
+}
+
+function startFree() { setMode("free"); goPage("generate"); }
+
+// ── Mode ──────────────────────────────────────────────
+function setMode(m) {
+  S.mode = m;
+  document.getElementById("modeTabStyle").classList.toggle("active", m==="style");
+  document.getElementById("modeTabFree").classList.toggle("active",  m==="free");
+  document.getElementById("modeStyleWrap").style.display = m==="style"?"block":"none";
+  document.getElementById("modeFreeWrap").style.display  = m==="free"?"block":"none";
+}
+
+// ── AI Improve Prompt ─────────────────────────────────
+async function improvePrompt() {
+  const ta  = document.getElementById("customPrompt");
+  const btn = document.getElementById("aiImproveBtn");
+  const txt = ta.value.trim();
+  if (!txt) { toast("Сначала введи промпт","err"); return; }
+  btn.classList.add("loading");
+  btn.textContent = "✨ Улучшаю...";
+  try {
+    const r = await fetch("https://api.anthropic.com/v1/messages", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        model:"claude-sonnet-4-20250514",
+        max_tokens:500,
+        messages:[{role:"user",content:`Улучши этот промпт для генерации изображения через ИИ (Nano Banana 2). Сделай его более детальным и профессиональным. Отвечай ТОЛЬКО улучшенным промптом на английском, без пояснений:\n\n${txt}`}]
+      })
+    });
+    const d = await r.json();
+    const improved = d.content?.[0]?.text;
+    if (improved) { ta.value = improved; toast("✨ Промпт улучшен!","ok"); }
+    else throw new Error();
+  } catch { toast("Не удалось улучшить промпт","err"); }
+  finally {
+    btn.classList.remove("loading");
+    btn.innerHTML = "✨ Улучшить промпт с помощью ИИ";
+  }
+}
+
+// ── Upload ────────────────────────────────────────────
+function handleUpload(input) {
+  const file=input.files[0]; if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    S.photo={dataUrl:e.target.result,file}; S.photoUrl=null;
+    document.getElementById("uploadZone").style.display="none";
+    document.getElementById("uploadPreview").style.display="block";
+    document.getElementById("previewImg").src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function delPhoto(){
+  S.photo=null; S.photoUrl=null;
+  document.getElementById("uploadZone").style.display="block";
+  document.getElementById("uploadPreview").style.display="none";
+  document.getElementById("fileInput").value="";
+}
+
+// ── Chips ─────────────────────────────────────────────
+function renderChips(){
+  document.getElementById("aspectChips").innerHTML=ASPECTS.map(a=>
+    `<button class="chip ${a===S.aspect?'active':''}" onclick="setA('${a}')">${a}</button>`).join("");
+  document.getElementById("resChips").innerHTML=RES.map(r=>
+    `<button class="chip ${r===S.res?'active':''}" onclick="setR('${r}')">${r}</button>`).join("");
+}
+function setA(v){S.aspect=v;renderChips()}
+function setR(v){S.res=v;renderChips()}
+
+// ── Progress bar ──────────────────────────────────────
+function startProgress() {
+  S.progress = 0;
+  const pw = document.getElementById("progressWrap");
+  pw.classList.add("visible");
+  // Симулируем прогресс как у Neurosphere
+  const hints = ["Анализирую референс...", "Создаю изображение...", "Финальная обработка..."];
+  let hint = 0;
+  S.progressTimer = setInterval(()=>{
+    if (S.progress < 85) {
+      S.progress += Math.random() * 4 + 1;
+      if (S.progress > 85) S.progress = 85;
+    }
+    document.getElementById("progressBar").style.width = S.progress+"%";
+    document.getElementById("progressPct").textContent = Math.round(S.progress)+"%";
+    if (S.progress > 30 && hint === 0) { document.getElementById("progressHint").textContent = hints[1]; hint=1; }
+    if (S.progress > 70 && hint === 1) { document.getElementById("progressHint").textContent = hints[2]; hint=2; }
+  }, 600);
+}
+function finishProgress() {
+  clearInterval(S.progressTimer);
+  S.progress = 100;
+  document.getElementById("progressBar").style.width = "100%";
+  document.getElementById("progressPct").textContent = "100%";
+  setTimeout(()=>{ document.getElementById("progressWrap").classList.remove("visible"); }, 800);
+}
+function resetProgress() {
+  clearInterval(S.progressTimer);
+  document.getElementById("progressWrap").classList.remove("visible");
+  document.getElementById("progressBar").style.width = "0%";
+  document.getElementById("progressPct").textContent = "0%";
+  document.getElementById("progressHint").textContent = "Обычно занимает 30–90 секунд...";
+}
+
+// ── Generate ──────────────────────────────────────────
+async function generate() {
+  if (S.generating) return;
+  let prompt = "";
+  if (S.mode==="style") {
+    if (!S.selected) { toast("Выбери стиль в каталоге","err"); return; }
+    prompt = S.selected.prompt;
+  } else {
+    prompt = document.getElementById("customPrompt").value.trim();
+    if (!prompt) { toast("✏️ Введи описание!","err"); return; }
+  }
+  if (!S.photo) { toast("📸 Загрузи своё фото!","err"); return; }
+  if (S.balance!==null && S.balance<12) { toast("❌ Недостаточно кредитов","err"); return; }
+
+  S.generating=true;
+  const btn=document.getElementById("genBtn");
+  btn.classList.add("loading"); btn.disabled=true;
+  startProgress();
+
+  const phId=Date.now();
+  addPh(phId); goPage("gallery");
+
+  try {
+    if (!S.photoUrl) {
+      const blob=await(await fetch(S.photo.dataUrl)).blob();
+      const form=new FormData();
+      form.append("file",blob,"ref.jpg");
+      form.append("user_id",S.uid||"anon");
+      const ur=await fetch(`${API}/upload`,{method:"POST",body:form});
+      const ud=await ur.json();
+      if(ud.error) throw new Error(ud.error);
+      S.photoUrl=ud.fileUrl;
+    }
+    const gr=await fetch(`${API}/generate`,{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({user_id:S.uid,prompt,model:"nano-banana-2",
+        aspect_ratio:S.aspect,resolution:S.res,
+        image_input:[S.photoUrl],card_id:S.selected?.id||"free"})
+    });
+    const gd=await gr.json();
+    if(gd.error) throw new Error(gd.error);
+    if(!gd.taskId) throw new Error("Нет taskId");
+
+    for(let i=0;i<60;i++){
+      await sleep(5000);
+      const sr=await fetch(`${API}/status?taskId=${gd.taskId}&user_id=${S.uid}&card_id=${S.selected?.id||"free"}`);
+      const sd=await sr.json();
+      if(sd.state==="success"&&sd.imageUrl){
+        if(sd.balance!==undefined){S.balance=sd.balance;updateBalDisplay()}
+        finishProgress();
+        replacePh(phId,sd.imageUrl,S.selected?.title||"Генерация",prompt,S.selected?.id);
+        toast("✦ Готово!","ok");
+        try{vkBridge.send("VKWebAppTapticNotificationOccurred",{type:"success"})}catch{}
+        return;
+      }
+      if(sd.state==="fail") throw new Error(sd.error||"Генерация не удалась");
+    }
+    throw new Error("Превышено время ожидания");
+  } catch(e){
+    resetProgress();
+    delPh(phId);
+    toast("❌ "+(e.message||"Ошибка"),"err");
+  } finally {
+    S.generating=false;
+    btn.classList.remove("loading"); btn.disabled=false;
+  }
+}
+
+// ── Gallery ───────────────────────────────────────────
+function addPh(id){S.gallery.unshift({id,ph:true});renderGallery()}
+function delPh(id){S.gallery=S.gallery.filter(g=>g.id!==id);renderGallery()}
+function replacePh(id,url,title,prompt,cardId){
+  const i=S.gallery.findIndex(g=>g.id===id);
+  if(i!==-1) S.gallery[i]={id,url,title,prompt:prompt||"",cardId:cardId||"",ts:Date.now(),fav:false};
+  saveGal(); renderGallery();
+}
+function saveGal(){localStorage.setItem("nb_v4_gal",JSON.stringify(S.gallery.filter(g=>!g.ph).slice(0,50)))}
+
+function filterGal(type,el){
+  S.galFilter=type;
+  document.querySelectorAll(".gal-filter-btn").forEach(b=>b.classList.remove("active"));
+  el.classList.add("active");
+  renderGallery();
+}
+
+function renderGallery(){
+  const grid=document.getElementById("galGrid");
+  const empty=document.getElementById("galEmpty");
+  let items=S.gallery;
+  if(S.galFilter==="fav") items=items.filter(g=>g.fav);
+
+  if(!items.length){
+    grid.style.display="none"; empty.style.display="block"; return;
+  }
+  empty.style.display="none"; grid.style.display="grid";
+
+  grid.innerHTML=items.map(g=>{
+    if(g.ph) return `<div class="gal-item ph" id="ph_${g.id}" style="aspect-ratio:3/4"></div>`;
+    return `<div class="gal-item">
+      <img class="gal-item-img" src="${g.url}" loading="lazy" onclick="openLb('${g.url}')">
+      <div class="gal-item-meta">
+        <div class="gal-item-style">${g.title||"Генерация"}</div>
+
+      </div>
+      <div class="gal-item-actions">
+        <button class="gal-item-btn" onclick="openLb('${g.url}')">👁 Смотреть</button>
+        <button class="gal-item-btn regen" onclick="regenFrom('${g.id}')">↻ Повторить</button>
+        <button class="gal-item-btn" onclick="toggleFav('${g.id}')">${g.fav?'❤️':'🤍'}</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+// Повторить генерацию — наша фича
+function regenFrom(id) {
+  const item = S.gallery.find(g=>g.id===id);
+  if (!item) return;
+  if (item.cardId) {
+    const card = (S.catalog.cards||[]).find(c=>c.id===item.cardId);
+    if (card) { selectCard(card); return; }
+  }
+  setMode("free");
+  document.getElementById("customPrompt").value = item.prompt||"";
+  goPage("generate");
+}
+
+function toggleFav(id){
+  const item=S.gallery.find(g=>g.id===id);
+  if(item){item.fav=!item.fav;saveGal();renderGallery()}
+}
+
+// ── Lightbox ──────────────────────────────────────────
+let _lbu="";
+function openLb(url){_lbu=url;document.getElementById("lbImg").src=url;document.getElementById("lb").classList.add("open")}
+function closeLb(){document.getElementById("lb").classList.remove("open")}
+function saveLb(){const a=document.createElement("a");a.href=_lbu;a.download="nano-banana.jpg";a.target="_blank";a.click()}
+
+// ── Pages ─────────────────────────────────────────────
+let S_activePage="home";
+function goPage(name){
+  S.prevPage=S_activePage;
+  S_activePage=name;
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll(".bnav-item").forEach(b=>b.classList.remove("active"));
+  document.getElementById("page-"+name).classList.add("active");
+  const nav=document.getElementById("nav-"+name);
+  if(nav) nav.classList.add("active");
+  window.scrollTo(0,0);
+}
+
+// ── Balance ───────────────────────────────────────────
+function openContact(msg=""){
+  try{vkBridge.send("VKWebAppOpenApp",{app_id:6,location:`im?sel=-238791027${msg?`&ref=${encodeURIComponent(msg)}`:""}`})}
+  catch{toast("Напиши в сообщество для оплаты","info")}
+}
+
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+let _tt;
+function toast(msg,type=""){
+  const el=document.getElementById("toast");
+  el.textContent=msg; el.className=`toast show ${type}`;
+  clearTimeout(_tt); _tt=setTimeout(()=>el.classList.remove("show"),2800);
+}
+
+init();
+</script>
+</body>
+</html>
