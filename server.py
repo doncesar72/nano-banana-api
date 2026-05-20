@@ -146,8 +146,12 @@ def kie_check(task_id):
 
 # ── Auth helper ───────────────────────────────────────────────
 def ok_secret():
-    d = request.json or {}
-    return (d.get("secret") or request.args.get("secret","")) == ADMIN_SECRET
+    try:
+        d = request.get_json(silent=True) or {}
+    except Exception:
+        d = {}
+    secret = d.get("secret") or request.args.get("secret","")
+    return secret == ADMIN_SECRET
 
 # ══════════════════════════════════════════════════════════════
 #  РОУТЫ
