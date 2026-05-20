@@ -1,15 +1,15 @@
 {
   "version": 2,
   "builds": [
-    {
-      "src": "api/index.py",
-      "use": "@vercel/python"
-    }
+    { "src": "api/index.py", "use": "@vercel/python" },
+    { "src": "admin.html", "use": "@vercel/static" },
+    { "src": "index.html", "use": "@vercel/static" },
+    { "src": "img/**", "use": "@vercel/static" }
   ],
   "routes": [
-    { "src": "/img/(.*)", "dest": "/public/img/$1" },
-    { "src": "/admin", "dest": "/public/admin.html" },
-    { "src": "/app", "dest": "/public/index.html" },
+    { "src": "/admin", "dest": "/admin.html" },
+    { "src": "/app", "dest": "/index.html" },
+    { "src": "/img/(.*)", "dest": "/img/$1" },
     { "src": "/(.*)", "dest": "/api/index.py" }
   ]
 }
