@@ -349,6 +349,13 @@ def admin_catalog_category():
     if not any(c["id"]==d["id"] for c in cats): cats.append(d); save_catalog(cat)
     return jsonify({"ok":True})
 
+@app.route("/admin/catalog/init", methods=["POST"])
+def admin_catalog_init():
+    """Инициализировать каталог всеми 14 дефолтными карточками"""
+    if not ok_secret(): return jsonify({"error":"Unauthorized"}),401
+    save_catalog(DEFAULT_CATALOG)
+    return jsonify({"ok":True,"cards":len(DEFAULT_CATALOG["cards"]),"categories":len(DEFAULT_CATALOG["categories"])})
+
 if __name__ == "__main__":
     port=int(os.environ.get("PORT",8080))
     app.run(host="0.0.0.0",port=port,debug=False)

@@ -272,6 +272,7 @@ textarea.fi{min-height:80px;resize:vertical;font-size:12px;line-height:1.5}
         <div style="font-size:16px;font-weight:700">Карточки стилей</div>
         <div style="display:flex;gap:8px">
           <button class="rbtn" onclick="loadCatalog()">↻ Обновить</button>
+          <button class="btn btn-b" onclick="initCatalog()">⬇ Загрузить 14 карточек</button>
           <button class="btn btn-y" onclick="openCardModal(null)">+ Добавить стиль</button>
         </div>
       </div>
@@ -646,6 +647,20 @@ function renderAnalytics(d) {
 // ── Catalog ───────────────────────────────────────────
 let catalogData = { categories:[], cards:[] };
 let activeCatFilter = "all";
+
+async function initCatalog() {
+  if (!confirm("Загрузить все 14 дефолтных карточек? Текущий каталог будет перезаписан.")) return;
+  try {
+    const r = await fetch(`${API}/admin/catalog/init`, {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({secret: SECRET})
+    });
+    const d = await r.json();
+    if (d.error) { toast(d.error,"err"); return; }
+    toast(`✓ Загружено ${d.cards} карточек!`,"ok");
+    loadCatalog();
+  } catch { toast("Ошибка сети","err"); }
+}
 
 async function loadCatalog() {
   try {
